@@ -219,6 +219,36 @@ class TestApi(object):
       assert_equal(response['status'], 'available')
 
 
+  def test_explain(self):
+
+    with patch('notebook.connectors.sql_alchemy.SqlAlchemyApi._get_engine') as engine:
+      with patch('notebook.connectors.sql_alchemy.SqlAlchemyApi._get_session') as session:
+
+        snippet = {'statement': 'SELECT 1'}
+        notebook = Mock()
+
+        result = {
+          'id': 1,
+          'select_type': 'SIMPLE',
+          'table': None,
+          'partitions': None,
+          'type': None,
+          'possible_keys': None,
+          'key': None,
+          'key_len': None,
+          'ref': None,
+          'rows': 1,
+          'filtered': None,
+          'Extra': 'No tables used'
+        }
+        
+        engine.execute = Mock(return_value=result)
+
+        response = SqlAlchemyApi(self.user, self. interpreter).explain(notebook, snippet)
+
+        assert_equal(response['explanation'], result)
+
+
   def test_get_sample_data(self):
     snippet = Mock()
 

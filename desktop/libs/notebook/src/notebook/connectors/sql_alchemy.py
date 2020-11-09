@@ -264,14 +264,24 @@ class SqlAlchemyApi(Api):
       self.options['session'] = session
 
     engine = self._get_engine()
-    connection = engine.connect()
     statement = snippet['statement']
 
-    explanation = ''
+    if statement:
+      result = engine.execute('EXPLAIN '+ statement)
+
+      for row in result:
+        result = dict(row)
+
+      explanation = ''
+      for key in result:
+        if result[key] == None:
+          explanation += key + ': ' + 'None' + '\n'
+        else:
+          explanation += key + ': ' + str(result[key]) + '\n'
 
     if statement:
       if self.options['url'].startswith('bigquery://'):
-        explanation = ''
+        explanation = explanation
 
     return {
       'status': 0,
